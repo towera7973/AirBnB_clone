@@ -30,13 +30,13 @@ import cmd
 import json
 from models import storage
 from models.base_model import BaseModel
-"""from models.user import User
+from models.user import User
 from models.state import State
 from models.city import City
 from models.review import Review
 from models.amenity import Amenity
 from models.place import Place
-"""
+
 
 class HBNBCommand(cmd.Cmd):
     """The commandline interpreter.
@@ -50,16 +50,9 @@ class HBNBCommand(cmd.Cmd):
     """
 
     prompt = "(hbnb) "
-    All_classes = {
-        "BaseModel",
-        "User",
-        "State",
-        "City",
-        "Place",
-        "Amenity",
-        "Review"
-    }
-
+    current_classes = {'BaseModel': BaseModel, 'Amenity': Amenity,
+               'State': State, 'Place': Place, 'Review': Review,
+               'User': User, 'City': City}
     def precmd(self, line):
         """procesing  instructions to execute before <line> command n prompt  is interpreted.
         """
@@ -102,7 +95,7 @@ class HBNBCommand(cmd.Cmd):
             return super().precmd(line)
 
         match_tuple = match_list[0]  
-        processed_command = process_matched_command(match_tuple)
+        
         def process_matched_command(match_tuple):
             method_name, object_name, arguments = match_tuple
     
@@ -116,7 +109,7 @@ class HBNBCommand(cmd.Cmd):
                     return "{} {}".format(method_name, object_name)
             else:
                 args = arguments.split(", ")
-                args = [re.sub("[\"\']", "", arg) for arg in args]  # Remove quotes from arguments
+                args = [re.sub("[\"\']", "", arg) for arg in args]
         
                 if len(args) == 1:
                     return "{} {} {}".format(method_name, object_name, args[0])
@@ -127,7 +120,7 @@ class HBNBCommand(cmd.Cmd):
                         return "{} {} {} {}".format(method_name, object_name, args[0], json_arg)
                     else:
                         return "{} {} {} {} {}".format(method_name, object_name, args[0], args[1], args[2])
-
+        processed_command = process_matched_command(match_tuple)
 
     def do_help(self, arg):
         """To get help on a command, type help <topic>.

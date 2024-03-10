@@ -37,14 +37,21 @@ class BaseModel:
     def to_dict(self):
         """Return the dictionary of the BaseModel instance.
         Includes the key/value pair and __class__ representing the class name of the object.
+        with dates when the BaseModel was created and then later update 
+
+        here the __class__ ,created_at and updated_at are keys e.g __class__: mymodel
         """
-        Storage_dict = self.__dict__.copy()
-        Storage_dict["created_at"] = self.created_at.isoformat()
-        Storage_dict["updated_at"] = self.updated_at.isoformat()
-        Storage_dict["__class__"] = self.__class__.__name__
-        return Storage_dict
+        inst_dict = self.__dict__.copy()
+        '''we are making a copy of dictionary representation of any instanca of a class that holds attributese'''
+        inst_dict["__class__"] = self.__class__.__name__
+        inst_dict["created_at"] = self.created_at.isoformat()
+        inst_dict["updated_at"] = self.updated_at.isoformat()
+        return inst_dict
 
     def __str__(self):
-        """Return the print/str representation of the BaseModel instance."""
+        """Return the print/str representation of the BaseModel instance.
+            this should return the name of the class (instance ) ,then id of class 
+            then the __dict__ created above 
+        """
         class_name = self.__class__.__name__
         return "[{}] ({}) {}".format(class_name, self.id, self.__dict__)
