@@ -4,41 +4,37 @@ import models
 from uuid import uuid4
 from datetime import datetime
 
-
 class BaseModel:
     """Represents the BaseModel of the AirBnB project."""
-
     def __init__(self, *args, **kwargs):
-        """constructor that Initialize a new BaseModel.
-        Args:
-            *args (any): Unused.
-            **kwargs (dict): Key/value pairs of attributes.
         """
-        string_T_format = "%Y-%m-%dT%H:%M:%S.%f"
-        self.id = str(uuid4())
-        self.created_at = datetime.today()
-        self.updated_at = datetime.today()
-        if len(kwargs) != 0:
-            for i, j in kwargs.items():
-                if i == "created_at" or i == "updated_at":
-                    self.__dict__[i] = datetime.strptime(j, string_T_format)
-                else:
-                    self.__dict__[i] = j
-        else:
-            models.storage.new(self)
+        instatiates an object with it's
+        attributes
+        """
+        if len(kwargs) > 0:
+            for key, value in kwargs.items():
+                if key == '__class__':
+                    continue
+                if key == "created_at" or key == "updated_at":
+                    value = datetime.fromisoformat(value)
+                setattr(self, key, value)
+            return
+
+        self.id = str(uuid.uuid4())
+        self.created_at = datetime.now()
+        self.updated_at = datetime.now()
+        models.storage.new(self)
 
     def save(self):
-        """This method updates the updated_at attribute with the current date and time.
-        It then calls models.storage.save(), which presumably saves the current state of the object 
-        to some form of persistent storage (like a database)."""
-        self.updated_at = datetime.today()
+        """ method updates the updated_at attribute with the current date and time.
+        which presumably saves the current state of the object to some form of storage ."""
+        self.updated_at = datetime.now()
         models.storage.save()
 
     def to_dict(self):
         """Return the dictionary of the BaseModel instance.
         Includes the key/value pair and __class__ representing the class name of the object.
-        with dates when the BaseModel was created and then later update 
-
+        with dates when the BaseModel was created and then later update
         here the __class__ ,created_at and updated_at are keys e.g __class__: mymodel
         """
         inst_dict = self.__dict__.copy()
