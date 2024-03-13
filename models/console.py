@@ -37,14 +37,9 @@ from models.review import Review
 from models.amenity import Amenity
 from models.place import Place
 
-current_classes = {'BaseModel': BaseModel, 'User': User,
-                   'Amenity': Amenity, 'City': City, 'State': State,
-                   'Place': Place, 'Review': Review}
-
 
 class HBNBCommand(cmd.Cmd):
-    """The command interpreter.
-
+    """The commandline interpreter.
     This class represents the command interpreter, and the control center
     of this project. It defines function handlers for all commands inputted
     in the console and calls the appropriate storage engine APIs to manipulate
@@ -55,44 +50,77 @@ class HBNBCommand(cmd.Cmd):
     """
 
     prompt = "(hbnb) "
-
+    current_classes = {'BaseModel': BaseModel, 'Amenity': Amenity,
+               'State': State, 'Place': Place, 'Review': Review,
+               'User': User, 'City': City}
     def precmd(self, line):
-        """Defines instructions to execute before <line> is interpreted.
+        """procesing  instructions to execute before <line> command n prompt  is interpreted.
         """
         if not line:
             return '\n'
+
+        """ simple illustration for understanding the re pre command 
+        import cmd
+        import re
+
+        class MyCmd(cmd.Cmd):
+        def precmd(self, line):
+        pattern = re.compile(r"(\w+)\.(\w+)\((.*)\)")
+        match_list = pattern.findall(line)
+        
+        if not match_list:
+            # If no matches found, fall back to the default behavior
+            return super().precmd(line)
+        else:
+            # Custom behavior for matched commands
+            # Example: Print the method name and arguments
+            for match in match_list:
+                method_name, object_name, arguments = match
+                print("Method:", method_name)
+                print("Object:", object_name)
+                print("Arguments:", arguments)
+            return line  # Return the line as-is
+
+        def do_quit(self, arg):
+        print("Exiting...")
+        return True
+
+        if __name__ == "__main__":
+        MyCmd().cmdloop()
+        """
 
         pattern = re.compile(r"(\w+)\.(\w+)\((.*)\)")
         match_list = pattern.findall(line)
         if not match_list:
             return super().precmd(line)
 
-        match_tuple = match_list[0]
-        if not match_tuple[2]:
-            if match_tuple[1] == "count":
-                instance_objs = storage.all()
-                print(len([
-                    v for _, v in instance_objs.items()
-                    if type(v).__name__ == match_tuple[0]]))
-                return "\n"
-            return "{} {}".format(match_tuple[1], match_tuple[0])
-        else:
-            args = match_tuple[2].split(", ")
-            if len(args) == 1:
-                return "{} {} {}".format(
-                    match_tuple[1], match_tuple[0],
-                    re.sub("[\"\']", "", match_tuple[2]))
+        match_tuple = match_list[0]  
+        
+        def process_matched_command(match_tuple):
+            method_name, object_name, arguments = match_tuple
+    
+            if not arguments:
+                if method_name == "count":
+                    instance_objs = storage.all()
+                    count = len([v for _, v in instance_objs.items() if type(v).__name__ == object_name])
+                    print(count)
+                    return "\n"
+                else:
+                    return "{} {}".format(method_name, object_name)
             else:
-                match_json = re.findall(r"{.*}", match_tuple[2])
-                if (match_json):
-                    return "{} {} {} {}".format(
-                        match_tuple[1], match_tuple[0],
-                        re.sub("[\"\']", "", args[0]),
-                        re.sub("\'", "\"", match_json[0]))
-                return "{} {} {} {} {}".format(
-                    match_tuple[1], match_tuple[0],
-                    re.sub("[\"\']", "", args[0]),
-                    re.sub("[\"\']", "", args[1]), args[2])
+                args = arguments.split(", ")
+                args = [re.sub("[\"\']", "", arg) for arg in args]
+        
+                if len(args) == 1:
+                    return "{} {} {}".format(method_name, object_name, args[0])
+                else:
+                    match_json = re.findall(r"{.*}", arguments)
+                    if match_json:
+                        json_arg = re.sub("\'", "\"", match_json[0])
+                        return "{} {} {} {}".format(method_name, object_name, args[0], json_arg)
+                    else:
+                        return "{} {} {} {} {}".format(method_name, object_name, args[0], args[1], args[2])
+        processed_command = process_matched_command(match_tuple)
 
     def do_help(self, arg):
         """To get help on a command, type help <topic>.
