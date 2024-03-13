@@ -40,35 +40,24 @@ class FileStorage():
         FileStorage.__objects[key] = obj
 
     def save(self):
-        """
-        serializes or converts the dictonary data __objects to the JSON file (path: __file_path)
-        """
-        with open(FileStorage.__file_path, 'w') as f:
-            json.dump({key_index: value.to_dict() for key_index, value in FileStorage.__objects.items()}, f)
+        """serializes __objects to the JSON file (path: __file_path)"""
+
+        ''' create empty dictionary'''
+        json_object = {}
+        """ fill dictionary with elements __objects """
+        for key in self.__objects:
+            json_object[key] = self.__objects[key].to_dict()
+
+        with open(self.__file_path, 'w', encoding ="utf-8") as f:
+            json.dump(json_object, f)
 
     def reload(self):
-        """
-        deserializes the JSON file to __objects only if the JSON
-        file exists; otherwise, does nothing
-        """
-        All_classes = {'BaseModel': BaseModel, 'User': User,
-                           'Amenity': Amenity, 'City': City, 'State': State,
-                           'Place': Place, 'Review': Review}
-
-        if not os.path.exists(FileStorage.__file_path):
-            return
-
-        with open(FileStorage.__file_path, 'r') as f:
-            From_Json = None
-
-            try:
-                From_Json = json.load(f)
-            except json.JSONDecodeError:
-                pass
-
-            if From_Json is None:
-                return
-
-            FileStorage.__objects = {
-                i: All_classes[i.split('.')[0]](**j)
-                for i, j in From_Json.items()}
+        """ deserializes the JSON file to __objects """
+        try:
+            with open(self.__file_path, 'r', encoding="utf-8") as f:
+                # jlo = json.load(f)
+                for key, value in json.load(f).items():
+                    attri_value = eval(value["__class__"])(**value)
+                    self.__objects[key] = attri_value
+        except FileNotFoundError:
+            pass
